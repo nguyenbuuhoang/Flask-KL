@@ -81,7 +81,7 @@ def save_data_to_history():
 
     vietnam_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
 
-    current_time = datetime.datetime.now(vietnam_timezone)
+    current_time = datetime.now(vietnam_timezone)
 
     current_date = current_time.strftime('%d-%m-%Y')
     current_hours = current_time.strftime('%H')
