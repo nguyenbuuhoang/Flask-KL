@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/menu.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
-
 <header>
     {% include 'components/menu.html' %}
 </header>
@@ -15,7 +14,7 @@
     <div class="datepicker-container">
         <input type="text" id="from_date" placeholder="Từ ngày" class="datepicker-input">
         <input type="text" id="to_date" placeholder="Đến ngày" class="datepicker-input">
-        <button id="filter_btn">Chọn</button>
+        <button id="filter_btn"><i class="far fa-paper-plane"></i></button>
         <button id="export-excel">Xuất Excel</button>
     </div>
     <div class="table-history">
