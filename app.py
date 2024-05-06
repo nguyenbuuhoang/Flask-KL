@@ -2,12 +2,11 @@ import firebase_admin
 import bcrypt
 import re
 import os
-from flask import Flask, render_template, request, jsonify, make_response, redirect, session
+from flask import Flask, render_template, request, jsonify, redirect, session
 from firebase_admin import credentials, db
 from dotenv import load_dotenv
 from flask_mail import Mail, Message
-import threading
-import datetime
+from datetime import datetime, timedelta
 import pytz
 previous_data = None
 sensor_enabled = True
@@ -135,6 +134,63 @@ def save_data_to_history():
         response = {"status": "error", "message": "Không có dữ liệu snapshot!"}
 
     return jsonify(response)
+#..............................................................................................................................#
+#Lấy dữ liệu
+@app.route('/get_charts', methods=['POST'])
+def get_charts():
+    date = request.json['date']
+    history_ref = db.reference('/history/' + date)
+    history_data = history_ref.get()
+
+    formatted_data = []
+
+    if history_data:
+        for key1, value1 in history_data.items():
+            for key2, value2 in value1.items():
+                for key3, value3 in value2.items():
+                    formatted_data.append({
+                         'date': date,
+                        'time': f"{key1}:{key2}",
+                        'humi': value3['humi'],
+                        'temp': value3['temp'],
+                        'water_level': value3['water_level']
+                    })
+
+    return jsonify(formatted_data)
+#..............................................................................................................................#
+@app.route('/get_history', methods=['POST'])
+def get_history():
+    start_date = request.json['start_date']
+    end_date = request.json['end_date']
+
+    # Convert start_date và end_date thành đối tượng datetime
+    start_datetime = datetime.strptime(start_date, '%d-%m-%Y')
+    end_datetime = datetime.strptime(end_date, '%d-%m-%Y')
+
+    formatted_data = []
+
+    # Lặp qua mỗi ngày trong khoảng thời gian và lấy dữ liệu
+    while start_datetime <= end_datetime:
+        date = start_datetime.strftime('%d-%m-%Y')
+        history_ref = db.reference('/history/' + date)
+        history_data = history_ref.get()
+
+        if history_data:
+            for key1, value1 in history_data.items():
+                for key2, value2 in value1.items():
+                    for key3, value3 in value2.items():
+                        formatted_data.append({
+                            'date': date,
+                            'time': f"{key1}:{key2}",
+                            'humi': value3['humi'],
+                            'temp': value3['temp'],
+                            'water_level': value3['water_level']
+                        })
+
+        start_datetime += timedelta(days=1)
+
+    return jsonify(formatted_data)
+
 
 #..............................................................................................................................#
 # Eror 404 not found
@@ -162,6 +218,11 @@ def about():
 def charts():
     username = session.get('username')
     return render_template('user/charts.html', username=username)
+#History page
+@app.route("/history")
+def history():
+    username = session.get('username')
+    return render_template('user/history.html', username=username)
 #Setting page
 @app.route("/settings")
 def settings():

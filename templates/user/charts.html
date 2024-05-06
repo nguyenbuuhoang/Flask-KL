@@ -42,42 +42,34 @@
                 const data = snapshot.val();
 
                 if (data) {
-                    // Xử lý dữ liệu và cập nhật biểu đồ
-                    const _sorted_keys = Object.keys(data).sort((a, b) => {
-                        const [keyA, keyB] = [a.split(':').map(Number), b.split(':').map(Number)];
-                        if (keyA[0] !== keyB[0]) {
-                            return keyA[0] - keyB[0];
-                        } else {
-                            return keyA[1] - keyB[1];
-                        }
+                    const sortedKeys = Object.keys(data).sort();
+                    const x_values_time_series = [];
+                    const y_values_humidity = [];
+                    const y_values_temperature = [];
+                    const y_values_water_level = [];
+
+                    sortedKeys.forEach(key => {
+                        const sortedKeys1 = Object.keys(data[key]).sort();
+                        sortedKeys1.forEach(key1 => {
+                            const sortedKeys2 = Object.keys(data[key][key1]).sort();
+                            sortedKeys2.forEach(key2 => {
+                                const _time = key + ":" + key1;
+                                x_values_time_series.push(_time);
+                                y_values_humidity.push(data[key][key1][key2].humi);
+                                y_values_temperature.push(data[key][key1][key2].temp);
+                                y_values_water_level.push(data[key][key1][key2].water_level);
+                            });
+                        });
                     });
 
-                    const _x_values_time_series = [];
-                    const _y_values_humidity = [];
-                    const _y_values_temperature = [];
-                    const _y_values_water_level = [];
-
-                    _sorted_keys.forEach(key => {
-                        for (const key_1 in data[key]) {
-                            for (const key_2 in data[key][key_1]) {
-                                const _time = key + ":" + key_1;
-                                _x_values_time_series.push(_time);
-                                _y_values_humidity.push(data[key][key_1][key_2].humi);
-                                _y_values_temperature.push(data[key][key_1][key_2].temp);
-                                _y_values_water_level.push(data[key][key_1][key_2].water_level);
-                            }
-                        }
-                    });
-
-                    main_chart.data.labels = _x_values_time_series;
-                    main_chart.data.datasets[0].data = _y_values_humidity;
-                    main_chart.data.datasets[1].data = _y_values_temperature;
-                    main_chart.data.datasets[2].data = _y_values_water_level;
+                    main_chart.data.labels = x_values_time_series;
+                    main_chart.data.datasets[0].data = y_values_humidity;
+                    main_chart.data.datasets[1].data = y_values_temperature;
+                    main_chart.data.datasets[2].data = y_values_water_level;
 
                     main_chart.options.title.text = 'Biểu đồ dữ liệu ngày ' + dateText;
                     main_chart.update();
                 } else {
-                    // Nếu không có dữ liệu, xóa dữ liệu cũ trong biểu đồ
                     main_chart.data.labels = [];
                     main_chart.data.datasets.forEach(dataset => {
                         dataset.data = [];
@@ -90,32 +82,28 @@
     });
 
     var main_chart;
-    var x_values_time_series = [];
-    var y_values_humidity = [];
-    var y_values_temperature = [];
-    var y_values_water_level = [];
 
     main_chart = new Chart("myChart", {
         type: "line",
         data: {
-            labels: x_values_time_series,
+            labels: [],
             datasets: [{
                 label: "Độ ẩm",
-                data: y_values_humidity,
+                data: [],
                 backgroundColor: 'rgba(100, 149, 237, 0.2)',
                 borderColor: 'rgba(100, 149, 237, 1)',
                 borderWidth: 1,
                 lineTension: 0.4
             }, {
                 label: "Nhiệt độ",
-                data: y_values_temperature,
+                data: [],
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 borderWidth: 1,
                 lineTension: 0.4
             }, {
                 label: "Mực nước",
-                data: y_values_water_level,
+                data: [],
                 backgroundColor: 'rgba(100, 255, 132, 0.2)',
                 borderColor: 'rgba(100, 255, 132, 1)',
                 borderWidth: 1,
